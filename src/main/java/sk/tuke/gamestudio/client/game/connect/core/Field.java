@@ -1,9 +1,13 @@
 package sk.tuke.gamestudio.client.game.connect.core;
 
+import sk.tuke.gamestudio.client.game.connect.core.GameState;
+
 public class Field {
     private int rows;
     private int cols;
+    private int score=0;
     private Tile[][] tiles;
+    private GameState state = GameState.PLAYING;
 
     private int currentPlayer;
 
@@ -45,6 +49,7 @@ public class Field {
                 return false;
             }
         }
+        state = GameState.FULL;
         return true;
     }
 
@@ -55,14 +60,19 @@ public class Field {
         return tiles[0][col].getPlayer() == 0;
     }
 
-    public boolean makeMove(int player, int col) {
+    public boolean makeMove( int col) {
         if (!isValidMove(col)) {
             return false;
         }
         for (int i = rows - 1; i >= 0; i--) {
             if (tiles[i][col].getPlayer() == 0) {
                 tiles[i][col].setPlayer(currentPlayer);
-                checkForWin(currentPlayer);
+                if(checkForWin(currentPlayer)){
+                    if (currentPlayer == 1)
+                        state = GameState.P1WIN;
+                    else
+                        state = GameState.P2WIN;
+                };
                 switchPlayer();
                 return true;
             }
@@ -121,5 +131,17 @@ public class Field {
 
         // no win found
         return false;
+    }
+
+    public Tile[][] getTiles() {
+        return tiles;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public GameState getState() {
+        return state;
     }
 }
