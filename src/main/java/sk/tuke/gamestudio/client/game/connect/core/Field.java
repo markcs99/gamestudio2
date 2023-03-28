@@ -9,6 +9,8 @@ public class Field {
     private Tile[][] tiles;
     private GameState state = GameState.PLAYING;
 
+    private long startTimeInMs;
+
     private int currentPlayer;
 
     public Field(int rows, int cols) {
@@ -21,6 +23,7 @@ public class Field {
             }
         }
         currentPlayer = 1;
+        startTimeInMs = System.currentTimeMillis();
     }
 
     public int getCurrentPlayer() {
@@ -68,6 +71,7 @@ public class Field {
             if (tiles[i][col].getPlayer() == 0) {
                 tiles[i][col].setPlayer(currentPlayer);
                 if(checkForWin(currentPlayer)){
+                    score = computeScore();
                     if (currentPlayer == 1)
                         state = GameState.P1WIN;
                     else
@@ -132,6 +136,15 @@ public class Field {
         // no win found
         return false;
     }
+
+    private int computeScore() {
+        int score = 0;
+            score = rows * cols * 10 -
+                    (int) ((System.currentTimeMillis() - startTimeInMs) / 1000);
+            if (score < 0) score = 0;
+        return score;
+    }
+
 
     public Tile[][] getTiles() {
         return tiles;
