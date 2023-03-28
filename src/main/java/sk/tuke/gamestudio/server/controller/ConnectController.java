@@ -23,9 +23,7 @@ import java.util.List;
 public class ConnectController {
 
     private Field field = null;
-    private boolean marking = false;
-    private int player= 1;
-
+    private GameState state = GameState.PLAYING;
     @Autowired
     private ScoreService scoreService;
 
@@ -40,12 +38,6 @@ public class ConnectController {
         return "connect";
     }
 
-    // /connect/chmode
-    @RequestMapping("/chmode")
-    public String changeMode(){
-        changeGameMode();
-        return "connect";
-    }
 
     // /connect/new
     @RequestMapping("/new")
@@ -55,42 +47,6 @@ public class ConnectController {
     }
 
 
-    // /connect/asynch
-    @RequestMapping("/asynch")
-    public String loadInAsynchMode(){
-        startOrUpdateGame(null,null);
-        return "connectAsynch";
-
-    }
-
-    // /connect/json
-    @RequestMapping(value="/json", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Field processUserInputJson(@RequestParam(required = false) Integer row,@RequestParam(required = false) Integer column){
-//        field.setJustFinished(startOrUpdateGame(row,column));
-//        field.setMarking(marking);
-        return field;
-    }
-
-    // /connect/jsonchmode
-    @RequestMapping(value="/jsonchmode", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Field changeModeJson(){
-        changeGameMode();
-//        field.setJustFinished(false);
-//        field.setMarking(marking);
-        return field;
-    }
-
-    // /connect/jsonnew
-    @RequestMapping(value="/jsonnew", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Field newGameJson(){
-        startNewGame();
-//        field.setJustFinished(false);
-//        field.setMarking(marking);
-        return field;
-    }
 
     private boolean startOrUpdateGame(Integer row, Integer column){
         if(field==null){
@@ -101,18 +57,18 @@ public class ConnectController {
 
         if(row!=null && column!=null){
 
-            GameState stateBeforeMove = field.getState();
+            state = field.getState();
 
-            if(stateBeforeMove == GameState.PLAYING){
+            if(state == GameState.PLAYING){
                     field.makeMove(column);
             }
 
+            state = field.getState();
 
-
-            if(field.getState()!=GameState.PLAYING){
+            if(state!=GameState.PLAYING && state!=GameState.FULL){
                 justFinished=true;
                 if(userController.isLogged()){
-                    scoreService.addScore(new Score("connect",userController.getLoggedUser(),field.getScore(), new Date()));
+                    scoreService.addScore(new Score("connect",userController.getLoggedUser()+state,field.getScore(), new Date()));
                 }
             }
         }
@@ -123,19 +79,7 @@ public class ConnectController {
 
     private void startNewGame(){
         field = new Field(9,9);
-        marking = false;
-        player = field.getCurrentPlayer();
-    }
-
-    private void changeGameMode(){
-        if(field==null){
-            startNewGame();
-        }
-        marking=!marking;
-    }
-
-    public  boolean isMarking(){
-        return marking;
+        state = field.getState();
     }
 
     public String getCurrentTime(){
@@ -169,7 +113,7 @@ public class ConnectController {
             sb.append("<tr>\n");
             for (int column = 0; column < field.getCols(); column++) {
                 var tile = field.getTile(row, column);
-                sb.append("<td class='" + getTileClass(tile) + "'>\n");
+                sb.append("<td style='" + getTileStyle(tile) + "'>\n");
                 if(field.getState()==GameState.PLAYING){
                     sb.append("<a href='/connect?row="+row+"&column="+column+"'>\n");
                     sb.append("<span>" + getTileText(tile) + "</span>");
@@ -199,22 +143,28 @@ public class ConnectController {
         }
     }
 
-    public String getTileClass(Tile tile) {
-        switch (tile.getPlayer()) {
-            case 1:
-                return "p1";
-            case 2:
-                return "p2";
-            case 0:
-                return "empty";
-            default:
-                throw new RuntimeException("Unexpected tile state");
+    public String getTileStyle(Tile tile) {
+        if (tile.getPlayer() == 1) {
+            return "background-color: #ff5555;border-radius: 50%;";
+        } else if (tile.getPlayer() == 2) {
+            return "background-color: #5555ff;border-radius: 50%;";
+        } else {
+            return "border-radius: 50%;";
         }
     }
 
+    public String getPlayingStyle() {
+        if (field.getState() != GameState.PLAYING) return "";
+        if (field.getCurrentPlayer() == 1) {
+            return "background-color: #ff5555;border-radius: 10%;";
+        } else if (field.getCurrentPlayer() == 2) {
+            return "background-color: #5555ff;border-radius: 10%;";
+        } else {
+            return "";
+        }
+    }
 
-
-
-
-
+    public GameState getState() {
+        return state;
+    }
 }

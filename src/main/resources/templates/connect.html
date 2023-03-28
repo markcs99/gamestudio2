@@ -11,10 +11,9 @@
 <main layout:fragment="content">
 
   <!--/*@thymesVar id="connectController" type="sk.tuke.gamestudio.server.controller.MinesController"*/-->
-  <h2>Connect</h2>
+  <h2>Connect: <span th:style="${@connectController.getPlayingStyle()}"
+                     th:text="${@connectController.getState()}"></span></h2>
 
-  <a class="abutton" th:if="not ${@connectController.marking}" href="/connect/chmode">Change to mark</a>
-  <a class="abutton" th:if="${@connectController.isMarking()}" href="/connect/chmode">Change to open</a>
   <a class="abutton" href="/connect/new">New game</a>
 
 
@@ -22,7 +21,8 @@
   <section>
     <table  class='minefield'>
       <tr th:each="row: ${@connectController.fieldTiles}">
-        <td th:each="tile: ${row}" th:attr="class=${@connectController.getTileClass(tile)}">
+        <td th:each="tile: ${row}"
+            th:style="${@connectController.getTileStyle(tile)}">
           <a th:if="${@connectController.isPlaying()}"
              th:href="@{/connect(row=${rowStat.index}, column=${tileStat.index})}">
             <span th:text="${@connectController.getTileText(tile)}"></span>
