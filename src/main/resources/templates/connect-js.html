@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.com" lang="en">
+<head>
+  <title>Minesweeper</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <link th:href="@{/styles/tailwind.css}" rel="stylesheet" />
+  <script src="/connect.js"></script>
+</head>
+<body class="p-4">
+<h1 class="header">
+  Connect Game
+</h1>
+<p class="subheader">
+</p>
+
+<button class="button-primary mb-6"
+        onclick="newGame()">New Game</button>
+
+<div id="connectfield"
+     class="minefield"
+     style="grid-template-columns: 0fr 0fr 0fr 0fr;">
+</div>
+
+<h2 class="subheader">Add a Comment</h2>
+
+<form class="mb-6"
+      id="commentForm"
+      onsubmit="alert('comment added!');return false">
+  <div class="mb-6">
+    <label for="name"
+           class="input-label">
+      Your name:
+    </label>
+    <input class="input-field"
+           type="text" id="name" name="name">
+  </div>
+  <div class="mb-6">
+    <label for="comment"
+           class="input-label">
+      Comment:
+    </label>
+    <input class="input-field"
+           type="text" id="comment" name="comment">
+  </div>
+  <button class="button-primary"
+          type="submit">Send</button>
+</form>
+
+<a class="button-link" href="/">&#x2190; Back to Home</a>
+</body>
+</html>
